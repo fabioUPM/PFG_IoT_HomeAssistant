@@ -348,7 +348,7 @@ class BME680_I2C(Adafruit_BME680):
         if self._debug:
             print("\t${:x} write".format(register), " ".join(["{:02x}".format(i) for i in values]))
         for value in values:
-            self._i2c.writeto_mem(self._address, register, bytearray([value]))
+            self._i2c.writeto_mem(self._address, register, bytearray([value & 0xFF]))
             register += 1
 
 
