@@ -14,7 +14,7 @@ APDS9960_LED_DRIVE_50MA   = const(1)
 APDS9960_LED_DRIVE_25MA   = const(2)
 APDS9960_LED_DRIVE_12_5MA = const(3)
 
-class Peripherals:
+class Sensors:
     
     def __init__(self,sdaPin: int =0, sclPin: int =1, id_i2c: int= 0):
         self.__i2c =I2C(id_i2c,scl=Pin(sclPin), sda=Pin(sdaPin))
