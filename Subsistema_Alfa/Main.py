@@ -3,7 +3,9 @@ from sensors import Sensors
 from actuators import Actuators
 
 def main():
-    
+    """
+    Main function that reads sensor data and controls actuators based on the data.
+    """
     sensor = Sensors()
     actuator = Actuators()
     actuator.initialize_RGBLEDs()
@@ -37,7 +39,7 @@ def main():
                     actuator.deactivate_RGBLED_alarm()
                     #actuator.turnOn_RGBLED(1,Actuators.GREEN)
                     
-            sleep(1)
+            sleep(2)
         except KeyboardInterrupt:
             print("Exiting program")
             actuator.deinit()
