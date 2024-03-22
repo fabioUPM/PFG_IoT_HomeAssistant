@@ -17,7 +17,7 @@ def main():
     
     while True:
         try:
-            sensor_data_bme680 = sensor.read_bme680_sensor()
+            sensor_data_bme680 = sensor.read_bme680_sensor(3)
             sensor_data_apds9960 = sensor.read_apds9960_sensor()
             
             if sensor_data_bme680 is not None and sensor_data_apds9960 != -1:
