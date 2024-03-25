@@ -40,38 +40,112 @@
 //Buzzer pins
 #define BUZZER_PIN 11
 
-//MotionSensor motion(pirPin);
-//Fan fan(PIN_ENABLE, PIN_DIR_CW, PIN_DIR_CCW);
-//dht11 DHT;
-//DHT dht(DHTPIN, DHTTYPE);
-
-//LightSensor light(LIGHT_SENSOR_PIN);
-
-//FlameDetector flame(FLAME_DIGITAL, FLAME_ANALOG);
-
+MotionSensor motion(pirPin);
+Fan fan(PIN_ENABLE, PIN_DIR_CW, PIN_DIR_CCW);
+DHT dht(DHTPIN, DHTTYPE);
+LightSensor light(LIGHT_SENSOR_PIN);
+FlameDetector flame(FLAME_DIGITAL, FLAME_ANALOG);
 RGBLed rgb(RED_PIN, GREEN_PIN, BLUE_PIN);
 Buzzer buzzer(BUZZER_PIN);
 Alarm alarm;
+
+unsigned long time_now = 0;
 
 void setup() {
   // Configure the pins as input or output:
   Serial.begin(9600);
   Serial.println("Comienza prueba");
-  //dht.begin();
-  //flame.enableFlameDetection();
   digitalWrite(ledPin, LOW);
+
+  dht.begin();
+  fan.initializeFan();
+  fan.setSpeed(255);
+  flame.enableFlameDetection();
+  motion.enableMotionDetection();
+
   rgb.setColor(0,0,0);
   alarm.configureAlarmLEDs(rgb);
   alarm.configureAlarmBuzzer(buzzer);
+
+  time_now = millis();
 }
 
 
 void loop() {
   
-  delay(5000);
-  alarm.activateAlarm();
-  delay(500);
-  alarm.deactivateAlarm();
+  /************* FLAME DETECTION**********/
+  if(flame.isFlameDetected()){
+    alarm.activateFlameAlarm();
+    fan.turnOn();
+    Serial.println("FLAME DETECTED");
+  } else if(flame.isFlameEnded()){
+    alarm.deactivateFlameAlarm();
+    fan.turnOff();
+    Serial.println("FLAME ENDED");
+  } else {
+  //nothing
+  }
+
+  /************ MOTION DETECTION **********/
+  if(motion.isMotionDetected()){
+    Serial.println("Motion detected");
+    alarm.activateMotionAlarm();
+  } else if(motion.isMotionEnded()){
+    Serial.println("Motion ended");
+    alarm.deactivateMotionAlarm();
+  } else {
+  //nothing
+  }
+
+  /**************** LIGHT SENSOR *********/
+  if(!alarm.getIsFlameActivated()){
+    LightLevel l = light.getLightLevel();
+    if(l == DARK){
+      rgb.setColor(255,0, 0);
+      rgb.turnOn();
+      
+    } else if (l == LOW_LIGHT) {
+      rgb.setColor(0,255,0);
+      rgb.turnOn();
+      
+    } else if (l == HIGH_LIGHT || l == NORMAL_LIGHT) {
+      rgb.turnOff();
+
+    } else {
+    //nothing
+    }
+  } else {
+  //nothing
+  }
+
+  /*************** TEMP AND HUM ***********/
+  if(millis() >= (time_now + 500)){
+    time_now = millis();
+    uint8_t h = dht.readHumidity();
+    float t = dht.readTemperature();
+    if (isnan(h) || isnan(t)) {
+      Serial.println(F("Failed to read from DHT sensor!"));
+    } else {
+      Serial.print(F("Humidity: "));
+      Serial.print(h);
+      Serial.print(F("%  Temperature: "));
+      Serial.print(t);
+      Serial.println(F("°C "));
+      if(!alarm.getIsFlameActivated()){
+        if(t >= 26){
+          //fan.setSpeed(200);
+          fan.turnOn();
+        } else {
+          fan.turnOff();
+        }
+      } else {
+        //noting
+      }
+    }
+  } else{
+    //nothing
+  }
+  
 
 
 

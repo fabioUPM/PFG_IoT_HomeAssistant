@@ -24,18 +24,50 @@ public:
     ~Alarm();  // Destructor
 
     /**
-     * @brief Activates the alarm.
+     * @brief Activates the Flame Detectionalarm.
      * 
-     * This method activates the alarm system.
+     * This method activates the Flame alarm system.
      */
-    void activateAlarm();  // Método para activar la alarma
+    void activateFlameAlarm();  // Método para activar la alarma
 
     /**
      * @brief Deactivates the alarm.
      * 
      * This method deactivates the alarm system.
      */
-    void deactivateAlarm();  // Método para desactivar la alarma
+    void deactivateFlameAlarm();  // Método para desactivar la alarma
+
+    /**
+     * @brief Gets the activation state of the alarm.
+     * 
+     * This method returns the current activation state of the alarm.
+     * 
+     * @return true if the alarm is activated, false otherwise.
+     */
+    bool getIsFlameActivated(); // Método para obtener el estado de la alarma
+
+    /**
+     * @brief Activates the Motion Detectionalarm.
+     * 
+     * This method activates the Motion alarm system.
+     */
+    void activateMotionAlarm();  // Método para activar la alarma
+
+    /**
+     * @brief Deactivates the Motion alarm.
+     * 
+     * This method deactivates the Motion alarm system.
+     */
+    void deactivateMotionAlarm();  // Método para desactivar la alarma
+
+    /**
+     * @brief Gets the activation state of the alarm.
+     * 
+     * This method returns the current activation state of the alarm.
+     * 
+     * @return true if the alarm is activated, false otherwise.
+     */
+    bool getIsMotionActivated(); // Método para obtener el estado de la alarma
 
     /**
      * @brief Configures the LEDs of the alarm.
@@ -55,17 +87,10 @@ public:
      */
     void configureAlarmBuzzer(Buzzer &buzzer);  // Método para configurar el buzzer de la alarma
 
-    /**
-     * @brief Gets the activation state of the alarm.
-     * 
-     * This method returns the current activation state of the alarm.
-     * 
-     * @return true if the alarm is activated, false otherwise.
-     */
-    bool getIsActivated(); // Método para obtener el estado de la alarma
 
 private:
-    bool isActivated;  // Indicador de si la alarma está activada o no
+    bool isFlameActivated;  // Indicador de si la alarma está activada o no
+    bool isMotionActivated;  // Indicador de si la alarma está activada o no
 };
 
 #endif

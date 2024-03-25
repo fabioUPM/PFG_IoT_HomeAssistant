@@ -1,3 +1,4 @@
+#include "Arduino.h"
 /**
  * @file FlameDetector.cpp
  * @brief Implementation file for the FlameDetector class.
@@ -58,9 +59,11 @@ void FlameDetector::disableFlameDetection() {
  * @return True if a flame is detected, false otherwise.
  */
 bool FlameDetector::isFlameDetected() {
-    if (flameDetected) {
-        attachInterrupt(digitalPinToInterrupt(pin), onFall, FALLING);
+    if (flameDetected && !flameEnded) {
         flameDetected = false;
+        detachInterrupt(digitalPinToInterrupt(pin));
+        delay(10);
+        attachInterrupt(digitalPinToInterrupt(pin), onFall, FALLING);
         return true;
     }
     return false;
@@ -71,9 +74,11 @@ bool FlameDetector::isFlameDetected() {
  * @return True if the flame has ended, false otherwise.
  */
 bool FlameDetector::isFlameEnded() {
-    if (flameEnded) {
-        attachInterrupt(digitalPinToInterrupt(pin), onRise, RISING);
+    if (flameEnded && !flameDetected) {
         flameEnded = false;
+        detachInterrupt(digitalPinToInterrupt(pin));
+        delay(10);
+        attachInterrupt(digitalPinToInterrupt(pin), onRise, RISING);
         return true;
     }
     return false;

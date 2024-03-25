@@ -9,8 +9,10 @@ RGBLed _RGB(0, 0, 0);  // Instancia de la clase RGBLed
 Buzzer _buzzer(0);  // Instancia de la clase Buzzer
 
 static bool changeColor = false;  // Indicador de cambio de color
+static bool changeTone = false;  // Indicador de cambio de tono
 
 static void blinkLEDsBuzzer();  // Prototipo de la función blinkLEDs
+static void changeBuzzerTone();  // Prototipo de la función changeBuzzerTone
 
 /**
  * @brief Constructor for the Alarm class.
@@ -19,7 +21,8 @@ static void blinkLEDsBuzzer();  // Prototipo de la función blinkLEDs
  * It sets the isActivated flag to false.
  */
 Alarm::Alarm() {
-    isActivated = false;
+    isFlameActivated = false;
+    isMotionActivated = false;
 }
 
 /**
@@ -37,29 +40,63 @@ Alarm::~Alarm() {
 }
 
 /**
- * @brief Activates the alarm.
+ * @brief Activates the Flame alarm.
  * 
- * This function activates the alarm by setting the isActivated flag to true.
+ * This function activates the Flame alarm by setting the flameIsActivated flag to true.
  * It initializes Timer1 with a period of 1 second and attaches the blinkLEDsBuzzer function to the interrupt.
  */
-void Alarm::activateAlarm() {
-    isActivated = true;
+void Alarm::activateFlameAlarm() {
+    if(getIsMotionActivated()){
+        deactivateMotionAlarm();
+    }
+    isFlameActivated = true;
     Timer1.initialize(100000);  // Inicializa el temporizador a 1 segundo
     Timer1.attachInterrupt(blinkLEDsBuzzer);  // Asocia la interrupción a la función blinkLEDs
 }
 
 /**
- * @brief Deactivates the alarm.
+ * @brief Deactivates the Flame alarm.
  * 
- * This function deactivates the alarm by setting the isActivated flag to false.
+ * This function deactivates the Flame alarm by setting the flameIsActivated flag to false.
  * It detaches the interrupt from Timer1, stops Timer1, turns off the RGB LED, and turns off the buzzer.
  */
-void Alarm::deactivateAlarm() {
-    isActivated = false;
-    Timer1.detachInterrupt();  // Desasocia la interrupción de la función blinkLEDs
-    Timer1.stop();  // Detiene el temporizador
-    _RGB.turnOff();  // Apaga los LEDs
-    _buzzer.turnOff();  // Apaga el buzzer
+void Alarm::deactivateFlameAlarm() {
+    if(getIsFlameActivated()){
+        isFlameActivated = false;
+        Timer1.detachInterrupt();  // Desasocia la interrupción de la función blinkLEDs
+        Timer1.stop();  // Detiene el temporizador
+        _RGB.turnOff();  // Apaga los LEDs
+        _buzzer.turnOff();  // Apaga el buzzer
+    }
+}
+
+/**
+ * @brief Activates the Motion alarm.
+ * 
+ * This function activates the MOtion alarm by setting the motionIsActivated flag to true.
+ * It initializes Timer1 with a period of 1 second and attaches the changeBuzzerTone function to the interrupt.
+ */
+void Alarm::activateMotionAlarm() {
+    if(!getIsFlameActivated()){
+        isMotionActivated = true;
+        Timer1.initialize(100000);  // Inicializa el temporizador a 1 segundo
+        Timer1.attachInterrupt(changeBuzzerTone);  // Asocia la interrupción a la función blinkLEDs
+    }
+}
+
+/**
+ * @brief Deactivates the Motion alarm.
+ * 
+ * This function deactivates the Motion alarm by setting the motionIsActivated flag to false.
+ * It detaches the interrupt from Timer1, stops Timer1, and turns off the buzzer.
+ */
+void Alarm::deactivateMotionAlarm() {
+    if(getIsMotionActivated() && !getIsFlameActivated()){
+        isMotionActivated = false;
+        Timer1.detachInterrupt();  // Desasocia la interrupción de la función blinkLEDs
+        Timer1.stop();  // Detiene el temporizador
+        _buzzer.turnOff();  // Apaga el buzzer
+    }
 }
 
 /**
@@ -85,14 +122,25 @@ void Alarm::configureAlarmBuzzer(Buzzer &buzzer) {
 }
 
 /**
- * @brief Gets the activation status of the alarm.
+ * @brief Gets the activation status of the Flame alarm.
  * 
- * This function returns the current activation status of the alarm.
+ * This function returns the current activation status of the Flame alarm.
  * 
- * @return True if the alarm is activated, false otherwise.
+ * @return True if the Flame alarm is activated, false otherwise.
  */
-bool Alarm::getIsActivated() {
-    return isActivated;
+bool Alarm::getIsFlameActivated() {
+    return isFlameActivated;
+}
+
+/**
+ * @brief Gets the activation status of the Motion alarm.
+ * 
+ * This function returns the current activation status of the Motion alarm.
+ * 
+ * @return True if the Motion alarm is activated, false otherwise.
+ */
+bool Alarm::getIsMotionActivated() {
+    return isMotionActivated;
 }
 
 /**
@@ -112,5 +160,22 @@ void blinkLEDsBuzzer() {
         _buzzer.setFrequency(700);
         _RGB.setColor(0, 0, 255);
         changeColor = true;
+    }
+}
+
+/**
+ * @brief Changes the tone of the buzzer.
+ * 
+ * This function is called by the Timer1 interrupt and is responsible for changing the tone of the buzzer.
+ * It alternates between two frequencies based on the changeTone flag.
+ */
+void changeBuzzerTone(){
+      _buzzer.turnOn();
+    if(changeTone){
+        _buzzer.setFrequency(1000);
+        changeTone = false;
+    } else {
+        _buzzer.setFrequency(700);
+        changeTone = true;
     }
 }
