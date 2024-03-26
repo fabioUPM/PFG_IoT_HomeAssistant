@@ -71,7 +71,7 @@ class Sensors:
         """
         return self.__apds9960.prox.proximityLevel
 
-    def read_bme680_sensor(self):
+    def read_bme680_sensor(self, offset: int=3):
         """
         Reads the temperature, humidity, pressure, and gas resistance from the BME680 sensor.
 
@@ -80,7 +80,7 @@ class Sensors:
             humidity, pressure, and gas resistance in kilo-ohms. Returns None if reading fails.
         """
         try:
-            temperature_C = self.__bme.temperature - 5
+            temperature_C = self.__bme.temperature - offset
             temperature_F = (temperature_C * 9/5) + 32
             humidity = self.__bme.humidity
             pressure = self.__bme.pressure

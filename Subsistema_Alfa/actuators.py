@@ -151,7 +151,7 @@ class Actuators:
         """
         Initialize the buzzer.
         """
-        self.__pwm = PWM(self.__pwmPin, freq=2000, duty_u16=0)
+        self.__pwm = PWM(Pin(self.__pwmPin))
         self.__pwmFreq = 1000
         self.__duty_u16 = 0
         self.__buzzer_alarm_activated = False
