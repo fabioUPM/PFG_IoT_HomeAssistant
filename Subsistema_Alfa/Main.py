@@ -1,6 +1,7 @@
 from time import sleep
 from sensors import Sensors
 from actuators import Actuators
+from TFTDisplay import TFTDisplay
 
 def main():
     """
@@ -8,12 +9,15 @@ def main():
     """
     sensor = Sensors()
     actuator = Actuators()
+    display = TFTDisplay()
     actuator.initialize_RGBLEDs()
     actuator.initialize_Buzzer()
     actuator.setFreq_Buzzer(800)
     actuator.setVolume_Buzzer(300)
     sensor.initialize_apds9960()
     sensor.initialize_bme680()
+    display.initializeDisplay()
+    
     
     while True:
         try:
@@ -31,18 +35,27 @@ def main():
                 print(f'Proximity: {proximity}')
                 print('-------')
                 
+                display.showTemperature(temp=temperature_C)
+                display.showHumidity(hum=humidity)
+                display.showGas(gas=gas_KOhms)
+                display.showPressure(pressure=pressure)
+                display.showStatusAlarm(False)
+                
                 if proximity > 150:
                     actuator.activate_RGBLED_alarm()
                     actuator.activate_Buzzer_alarm()
+                    display.activateTFTAlarm()
                 else:
                     actuator.deactivate_Buzzer_alarm()
                     actuator.deactivate_RGBLED_alarm()
+                    display.deactivateTFTAlarm()
                     #actuator.turnOn_RGBLED(1,Actuators.GREEN)
                     
-            sleep(2)
+            sleep(1)
         except KeyboardInterrupt:
             print("Exiting program")
             actuator.deinit()
+            display.deinitializeDisplay()
             break
         
 if __name__ == "__main__":
