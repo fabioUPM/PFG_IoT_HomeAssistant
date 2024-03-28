@@ -8,6 +8,7 @@
 #include "RGB.h"
 #include "Buzzer.h"
 #include "Alarm.h"
+#include <SoftwareSerial.h>
 
 
 // Define connection pins:
@@ -40,6 +41,12 @@
 //Buzzer pins
 #define BUZZER_PIN 11
 
+//Bluetooth pins
+#define TX_PIN 1
+#define RX_PIN 0
+
+
+SoftwareSerial BT(1,0);
 MotionSensor motion(pirPin);
 Fan fan(PIN_ENABLE, PIN_DIR_CW, PIN_DIR_CCW);
 DHT dht(DHTPIN, DHTTYPE);
@@ -66,6 +73,7 @@ void setup() {
   rgb.setColor(0,0,0);
   alarm.configureAlarmLEDs(rgb);
   alarm.configureAlarmBuzzer(buzzer);
+  BT.begin(9600);
 
   time_now = millis();
 }
@@ -77,10 +85,12 @@ void loop() {
   if(flame.isFlameDetected()){
     alarm.activateFlameAlarm();
     fan.turnOn();
+    BT.write("FLAME DETECTED");
     Serial.println("FLAME DETECTED");
   } else if(flame.isFlameEnded()){
     alarm.deactivateFlameAlarm();
     fan.turnOff();
+    BT.write("FLAME ENDED");
     Serial.println("FLAME ENDED");
   } else {
   //nothing
@@ -89,8 +99,10 @@ void loop() {
   /************ MOTION DETECTION **********/
   if(motion.isMotionDetected()){
     Serial.println("Motion detected");
+    BT.write("Motion detected");
     alarm.activateMotionAlarm();
   } else if(motion.isMotionEnded()){
+    BT.write("Motion ended");
     Serial.println("Motion ended");
     alarm.deactivateMotionAlarm();
   } else {
@@ -126,11 +138,13 @@ void loop() {
     if (isnan(h) || isnan(t)) {
       Serial.println(F("Failed to read from DHT sensor!"));
     } else {
+      String mensaje = "Temperatura: " + String(t) + " ºC, Humedad: " + String(h) + " %";
       Serial.print(F("Humidity: "));
       Serial.print(h);
       Serial.print(F("%  Temperature: "));
       Serial.print(t);
       Serial.println(F("°C "));
+      BT.write(mensaje.c_str());
       if(!alarm.getIsFlameActivated()){
         if(t >= 26){
           //fan.setSpeed(200);
