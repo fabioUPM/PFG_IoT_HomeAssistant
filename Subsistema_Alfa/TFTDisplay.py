@@ -38,11 +38,11 @@ class TFTDisplay:
         self.__rotation = rotation
         self.__height = height
         self.__width = width
-        self.__TFT_alarm_acivated = False
-        self.__TFT_timer = None
-        self.__change_TFT = False
+        self.__tft_alarm_activated = False
+        self.__tft_timer = None
+        self.__change_tft = False
         
-    def initializeDisplay(self)-> None:
+    def initialize_display(self)-> None:
         """
         Initializes the TFT display.
         """
@@ -54,7 +54,7 @@ class TFTDisplay:
         self.__display.fill(st7789.BLACK)
         
         
-    def showTemperature(self, show: bool=True, temp: float=0.00)-> None:
+    def show_temperature(self, show: bool=True, temp: float=0.00)-> None:
         """
         Displays the temperature on the TFT display.
 
@@ -62,18 +62,18 @@ class TFTDisplay:
         - show (bool): Whether to show the temperature or not.
         - temp (float): The temperature value.
         """
-        if not self.__TFT_alarm_acivated:
-            showTemp = str(f'{temp:.2f} C') if show else str('       ')
-            length = len(showTemp)
+        if not self.__tft_alarm_activated:
+            show_temp = str(f'{temp:.2f} C') if show else str('       ')
+            length = len(show_temp)
             self.__display.text(
                         font,
-                        showTemp,
+                        show_temp,
                         self.__display.width // 2 - length // 2 * font.WIDTH,
                         self.__display.height // 3 - font.HEIGHT //3,
                         st7789.WHITE,
                         st7789.BLACK)
         
-    def showHumidity(self, show: bool=True, hum: float=0.00)-> None:
+    def show_humidity(self, show: bool=True, hum: float=0.00)-> None:
         """
         Displays the humidity on the TFT display.
 
@@ -81,18 +81,18 @@ class TFTDisplay:
         - show (bool): Whether to show the humidity or not.
         - hum (float): The humidity value.
         """
-        if not self.__TFT_alarm_acivated:
-            showHum = str(f'{hum:.2f} %') if show else str('       ')
-            length = len(showHum)
+        if not self.__tft_alarm_activated:
+            show_hum = str(f'{hum:.2f} %') if show else str('       ')
+            length = len(show_hum)
             self.__display.text(
                         font,
-                        showHum,
+                        show_hum,
                         self.__display.width // 2 - length // 2 * font.WIDTH,
                         self.__display.height // 2 - font.HEIGHT //2,
                         st7789.WHITE,
                         st7789.BLACK)
         
-    def showGas(self, show: bool=True, gas: float=0.00)-> None:
+    def show_gas(self, show: bool=True, gas: float=0.00)-> None:
         """
         Displays the gas value on the TFT display.
 
@@ -100,18 +100,18 @@ class TFTDisplay:
         - show (bool): Whether to show the gas value or not.
         - gas (float): The gas value.
         """
-        if not self.__TFT_alarm_acivated:
-            showGasR = str(f'{gas:.2f} kOhm') if show else str(f'           ')
-            length = len(showGasR)
+        if not self.__tft_alarm_activated:
+            show_gas_r = str(f'{gas:.2f} kOhm') if show else str('          ')
+            length = len(show_gas_r)
             self.__display.text(
                         font,
-                        showGasR,
+                        show_gas_r,
                         self.__display.width // 2 - length // 2 * font.WIDTH,
                         140,
                         st7789.WHITE,
                         st7789.BLACK)
             
-    def showPressure(self, show: bool=True, pressure: float=0.00)-> None:
+    def show_pressure(self, show: bool=True, pressure: float=0.00)-> None:
         """
         Displays the pressure on the TFT display.
 
@@ -119,55 +119,55 @@ class TFTDisplay:
         - show (bool): Whether to show the pressure or not.
         - pressure (float): The pressure value.
         """
-        if not self.__TFT_alarm_acivated:
-            showPress = str(f'{pressure:.2f} hPa') if show else str('          ')
-            length = len(showPress)
+        if not self.__tft_alarm_activated:
+            show_press = str(f'{pressure:.2f} hPa') if show else str('          ')
+            length = len(show_press)
             self.__display.text(
                         font,
-                        showPress,
+                        show_press,
                         self.__display.width // 2 - length // 2 * font.WIDTH,
                         180,
                         st7789.WHITE,
                         st7789.BLACK)
             
-    def showStatusAlarm(self, engage: bool)-> None:
+    def show_status_alarm(self, engage: bool)-> None:
         """
         Displays the alarm status on the TFT display.
 
         Parameters:
         - engage (bool): Whether the alarm is engaged or not.
         """
-        if not self.__TFT_alarm_acivated:
-            alarmStatus = "ALARM ON " if engage else "ALARM OFF"
-            length = len(alarmStatus)
+        if not self.__tft_alarm_activated:
+            alarm_status = "ALARM ON " if engage else "ALARM OFF"
+            length = len(alarm_status)
             self.__display.text(
                         fontA,
-                        alarmStatus,
+                        alarm_status,
                         self.__display.width // 2 - length // 2 * font.WIDTH,
                         self.__display.height // 5 - fontA.HEIGHT //5,
                         st7789.GREEN if engage else st7789.RED,
                         st7789.BLACK)
     
-    def activateTFTAlarm(self):
+    def activate_tft_alarm(self):
         """
         Activates the TFT alarm.
         """
-        if not self.__TFT_alarm_acivated:
-            self.__TFT_alarm_acivated = True
+        if not self.__tft_alarm_activated:
+            self.__tft_alarm_activated = True
             self.__display.fill(st7789.BLACK)
-            self.__TFT_timer = Timer(period=500, mode=Timer.PERIODIC, callback=self._showAlarm)
+            self.__tft_timer = Timer(period=505, mode=Timer.PERIODIC, callback=self._show_alarm)
             
     
-    def deactivateTFTAlarm(self):
+    def deactivate_tft_alarm(self):
         """
         Deactivates the TFT alarm.
         """
-        if self.__TFT_alarm_acivated:
+        if self.__tft_alarm_activated:
             self.__display.fill(st7789.BLACK)
-            self.__TFT_alarm_acivated = False
-            self.__TFT_timer.deinit()
+            self.__tft_alarm_activated = False
+            self.__tft_timer.deinit()
             
-    def _showAlarm(self, t: Timer):
+    def _show_alarm(self, t: Timer):
         """
         Shows the alarm on the TFT display.
         This method is called periodically by the timer.
@@ -175,7 +175,7 @@ class TFTDisplay:
         Parameters:
         - t (Timer): The timer object.
         """
-        if self.__change_TFT:
+        if self.__change_tft:
             self.__display.fill(st7789.RED)
             warning = str("WARNING!!")
             length = len(warning)
@@ -190,34 +190,34 @@ class TFTDisplay:
             self.__display.fill(st7789.YELLOW)
             motion = str("MOTION")
             detected = str("DETECTED")
-            lengthM = len(motion)
-            lengthD = len(detected)
+            length_m = len(motion)
+            length_d = len(detected)
             self.__display.text(
                         font,
                         motion,
-                        self.__display.width // 2 - lengthM // 2 * font.WIDTH,
+                        self.__display.width // 2 - length_m // 2 * font.WIDTH,
                         self.__display.height // 3 - font.HEIGHT //3,
                         st7789.BLACK,
                         st7789.YELLOW)
             self.__display.text(
                         font,
                         detected,
-                        self.__display.width // 2 - lengthD // 2 * font.WIDTH,
+                        self.__display.width // 2 - length_d // 2 * font.WIDTH,
                         self.__display.height // 2 - font.HEIGHT //2,
                         st7789.BLACK,
                         st7789.YELLOW)
             
-        self.__change_TFT = not self.__change_TFT
+        self.__change_tft = not self.__change_tft
             
         
-    def deinitializeDisplay(self):
+    def deinitialize_display(self):
         """
         Deinitializes the TFT display.
         """
         self.__display.fill(st7789.BLACK)
         self.__spi.deinit()
-        if self.__TFT_timer is not None:
-            self.__TFT_timer.deinit()
+        if self.__tft_timer is not None:
+            self.__tft_timer.deinit()
         
         
         

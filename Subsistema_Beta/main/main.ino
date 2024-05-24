@@ -14,17 +14,17 @@
 // Define connection pins:
 
 // Motion Sensor PINs
-#define pirPin 2 //NARANJA
+#define pirPin 2  //NARANJA
 #define ledPin 13
 
 // Fan pins
-#define PIN_ENABLE 8 //BLANCO
-#define PIN_DIR_CW 10 //NARANJA
-#define PIN_DIR_CCW 9 //AZUL
+#define PIN_ENABLE 8   //BLANCO
+#define PIN_DIR_CW 10  //NARANJA
+#define PIN_DIR_CCW 9  //AZUL
 
 // DHT pins
-#define DHTPIN 4 //AZUL
-#define DHTTYPE DHT11   // DHT 11
+#define DHTPIN 4       //AZUL
+#define DHTTYPE DHT11  // DHT 11
 
 // Light Sensor pins
 #define LIGHT_SENSOR_PIN A0
@@ -46,7 +46,7 @@
 #define RX_PIN 0
 
 
-SoftwareSerial BT(1,0);
+SoftwareSerial BT(1, 0);
 MotionSensor motion(pirPin);
 Fan fan(PIN_ENABLE, PIN_DIR_CW, PIN_DIR_CCW);
 DHT dht(DHTPIN, DHTTYPE);
@@ -70,7 +70,7 @@ void setup() {
   flame.enableFlameDetection();
   motion.enableMotionDetection();
 
-  rgb.setColor(0,0,0);
+  rgb.setColor(0, 0, 0);
   alarm.configureAlarmLEDs(rgb);
   alarm.configureAlarmBuzzer(buzzer);
   BT.begin(9600);
@@ -80,58 +80,58 @@ void setup() {
 
 
 void loop() {
-  
+
   /************* FLAME DETECTION**********/
-  if(flame.isFlameDetected()){
+  if (flame.isFlameDetected()) {
     alarm.activateFlameAlarm();
     fan.turnOn();
     BT.write("FLAME DETECTED");
     Serial.println("FLAME DETECTED");
-  } else if(flame.isFlameEnded()){
+  } else if (flame.isFlameEnded()) {
     alarm.deactivateFlameAlarm();
     fan.turnOff();
     BT.write("FLAME ENDED");
     Serial.println("FLAME ENDED");
   } else {
-  //nothing
+    //nothing
   }
 
   /************ MOTION DETECTION **********/
-  if(motion.isMotionDetected()){
+  if (motion.isMotionDetected()) {
     Serial.println("Motion detected");
     BT.write("Motion detected");
     alarm.activateMotionAlarm();
-  } else if(motion.isMotionEnded()){
+  } else if (motion.isMotionEnded()) {
     BT.write("Motion ended");
     Serial.println("Motion ended");
     alarm.deactivateMotionAlarm();
   } else {
-  //nothing
+    //nothing
   }
 
   /**************** LIGHT SENSOR *********/
-  if(!alarm.getIsFlameActivated()){
+  if (!alarm.getIsFlameActivated()) {
     LightLevel l = light.getLightLevel();
-    if(l == DARK){
-      rgb.setColor(255,0, 0);
+    if (l == DARK) {
+      rgb.setColor(255, 0, 0);
       rgb.turnOn();
-      
+
     } else if (l == LOW_LIGHT) {
-      rgb.setColor(0,255,0);
+      rgb.setColor(0, 255, 0);
       rgb.turnOn();
-      
+
     } else if (l == HIGH_LIGHT || l == NORMAL_LIGHT) {
       rgb.turnOff();
 
     } else {
-    //nothing
+      //nothing
     }
   } else {
-  //nothing
+    //nothing
   }
 
   /*************** TEMP AND HUM ***********/
-  if(millis() >= (time_now + 500)){
+  if (millis() >= (time_now + 500)) {
     time_now = millis();
     uint8_t h = dht.readHumidity();
     float t = dht.readTemperature();
@@ -145,8 +145,8 @@ void loop() {
       Serial.print(t);
       Serial.println(F("°C "));
       BT.write(mensaje.c_str());
-      if(!alarm.getIsFlameActivated()){
-        if(t >= 26){
+      if (!alarm.getIsFlameActivated()) {
+        if (t >= 26) {
           //fan.setSpeed(200);
           fan.turnOn();
         } else {
@@ -156,10 +156,10 @@ void loop() {
         //noting
       }
     }
-  } else{
+  } else {
     //nothing
   }
-  
+
 
 
 
@@ -206,7 +206,7 @@ void loop() {
   Serial.print(t);
   Serial.println(F("°C "));*/
 
-  
+
   /*fan.setDirection(COUNTER_CLOCKWISE);
   fan.turnOn();
   for(uint16_t i= 100; i < 256; i++){

@@ -29,135 +29,147 @@ class Actuators:
     BLUE = Color(255, 0, 0)
     WHITE = Color(255, 255, 255)
 
-    __changeOn_Off_led: bool
-    __rgb_alarm_activated: bool
-    __numLED_alarm: int
+    __change_on_off: bool
+    __alarm_activated: bool
+    __num_led_alarm: int
     __alarm_color: Color
+    __rgb_led_on: bool
 
-    __buzzer_alarm_activated: bool
-    __changeOn_Off_buzzer: bool
-
-    def __init__(self,sckPin: int= 2, mosiPin: int= 3, id_spi: int= 0, pwmPin: int= 15):
+    def __init__(self, sck_pin: int=2, mosi_pin: int=3, id_spi: int=0, pwm_pin: int=15):
         """
         Initialize the Actuators object.
 
         Args:
-            sckPin (int, optional): The pin number for the SPI clock. Defaults to 2.
-            mosiPin (int, optional): The pin number for the SPI MOSI. Defaults to 3.
+            sck_pin (int, optional): The pin number for the SPI clock. Defaults to 2.
+            mosi_pin (int, optional): The pin number for the SPI MOSI. Defaults to 3.
             id_spi (int, optional): The SPI ID. Defaults to 0.
-            pwmPin (int, optional): The pin number for the PWM output. Defaults to 15.
+            pwm_pin (int, optional): The pin number for the PWM output. Defaults to 15.
         """
-        self.__spi = SoftSPI(sck=Pin(sckPin), mosi=Pin(mosiPin), baudrate=1000000, miso=Pin(4))
-        self.__pwmPin = pwmPin
+        self.__spi = SoftSPI(sck=Pin(sck_pin), mosi=Pin(mosi_pin), baudrate=1000000, miso=Pin(4))
+        self.__pwm_pin = pwm_pin
+        self.__alarm_timer = None
+        self.__alarm_activated = False
+        self.__change_on_off = True
 
-    def initialize_RGBLEDs(self, num_RGBLEDs: int= 5) -> None:
+    def initialize_rgbleds(self, num_rgb_leds: int= 5) -> None:
         """
         Initialize the RGB LEDs.
 
         Args:
-            num_RGBLEDs (int, optional): The number of RGB LEDs. Defaults to 5.
+            num_rgb_leds (int, optional): The number of RGB LEDs. Defaults to 5.
         """
-        self.__pixelp = SPIDotStar(self.__spi, num_RGBLEDs)
-        self.__numRGBLEDs = num_RGBLEDs
-        self.__changeOn_Off_led = False
-        self.__rgb_alarm_activated = False
+        self.__num_rgb_leds = num_rgb_leds
+        self.__pixelp = SPIDotStar(self.__spi, num_rgb_leds)
+        self.__rgb_led_on = False
 
-    def turnOff_all_RGBLEDs(self) -> None:
+    def turn_off_all_rgbleds(self) -> None:
         """
         Turn off all RGB LEDs.
         """
-        for pixel in range(self.__numRGBLEDs):
+        for pixel in range(self.__num_rgb_leds):
             self.__pixelp[pixel] = (0, 0, 0)
         self.__pixelp.show()
+        self.__rgb_led_on = False
 
-    def turnOn_all_RGBLEDs(self, color: Color) -> None:
+    def turn_on_all_rgbleds(self, color: Color) -> None:
         """
         Turn on all RGB LEDs with the specified color.
 
         Args:
             color (Color): The color to set the LEDs to.
         """
-        for pixel in range(self.__numRGBLEDs):
+        for pixel in range(self.__num_rgb_leds):
             self.__pixelp[pixel] = color._color
         self.__pixelp.show()
+        self.__rgb_led_on = True
 
-    def turnOff_RGBLED(self, numLED: int) -> None:
+    def turn_off_rgbled(self, num_led: int) -> None:
         """
         Turn off a specific RGB LED.
 
         Args:
-            numLED (int): The index of the LED to turn off.
+            num_led (int): The index of the LED to turn off.
         """
-        if numLED in range(self.__numRGBLEDs):
-            self.__pixelp[numLED] = (0, 0, 0)
+        if num_led in range(self.__num_rgb_leds):
+            self.__pixelp[num_led] = (0, 0, 0)
             self.__pixelp.show()
+            self.__rgb_led_on = False
         else:
             print("Index out of bound")
 
-    def turnOn_RGBLED(self, numLED: int, color: Color) -> None:
+    def turn_on_rgbled(self, num_led: int, color: Color) -> None:
         """
         Turn on a specific RGB LED with the specified color.
 
         Args:
-            numLED (int): The index of the LED to turn on.
+            num_led (int): The index of the LED to turn on.
             color (Color): The color to set the LED to.
         """
-        if numLED in range(self.__numRGBLEDs):
-            self.__pixelp[numLED] = color._color
+        if num_led in range(self.__num_rgb_leds):
+            self.__pixelp[num_led] = color._color
             self.__pixelp.show()
+            self.__rgb_led_on = True
         else:
             print("Index out of bound")
+            
+    def is_rgb_led_on(self) -> bool:
+        return self.__rgb_led_on
 
-    def _turn_RGBLED(self, t) -> None:
+    def _turn_alarm(self, t) -> None:
         """
-        Internal method for toggling the RGB LEDs on/off based on the alarm state.
+        Internal method for toggling the RGB LEDs and Buzzeron/off based on the alarm state.
         """
-        if self.__changeOn_Off_led:
-            if self.__numLED_alarm in range(self.__numRGBLEDs):
-                self.turnOn_RGBLED(self.__numLED_alarm, self.__alarm_color)
+        if self.__change_on_off:
+            self.sound_buzzer()
+            if self.__num_led_alarm in range(self.__num_rgb_leds):
+                self.turn_on_rgbled(self.__num_led_alarm, self.__alarm_color)
             else:
-                self.turnOn_all_RGBLEDs(self.__alarm_color)
+                self.turn_on_all_rgbleds(self.__alarm_color)
         else:
-            if self.__numLED_alarm in range(self.__numRGBLEDs):
-                self.turnOff_RGBLED(self.__numLED_alarm)
+            self.silence_buzzer()
+            if self.__num_led_alarm in range(self.__num_rgb_leds):
+                self.turn_off_rgbled(self.__num_led_alarm)
             else:
-                self.turnOff_all_RGBLEDs()
-        self.__changeOn_Off_led = not self.__changeOn_Off_led
+                self.turn_off_all_rgbleds()
+        self.__change_on_off = not self.__change_on_off
 
-    def activate_RGBLED_alarm(self, numLED_alarm: int= -1, alarm_color: Color= RED) -> None:
+    def activate_alarm(self, num_led_alarm: int= -1, alarm_color: Color= RED) -> None:
         """
-        Activate the RGB LED alarm.
+        Activate the alarm.
 
         Args:
-            numLED_alarm (int, optional): The index of the LED to use for the alarm. Defaults to -1.
+            num_led_alarm (int, optional): The index of the LED to use for the alarm. Defaults to -1.
             alarm_color (Color, optional): The color to set the LED(s) to during the alarm. Defaults to RED.
         """
-        if not self.__rgb_alarm_activated:
-            self.__numLED_alarm = numLED_alarm
+        if not self.__alarm_activated:
+            self.__num_led_alarm = num_led_alarm
             self.__alarm_color = alarm_color
-            self.__rgbled_timer = Timer(period=500, mode=Timer.PERIODIC, callback=self._turn_RGBLED)
-            self.__rgb_alarm_activated = True
+            self.turn_off_all_rgbleds()
+            self.silence_buzzer()
+            self.__alarm_timer = Timer(period=500, mode=Timer.PERIODIC, callback=self._turn_alarm)
+            self.__alarm_activated = True
+            self.__change_on_off = True
 
-    def deactivate_RGBLED_alarm(self) -> None:
+    def deactivate_alarm(self) -> None:
         """
-        Deactivate the RGB LED alarm.
+        Deactivate the alarm.
         """
-        if self.__rgb_alarm_activated:
-            self.__rgbled_timer.deinit()
-            self.__rgb_alarm_activated = False
-            self.turnOff_all_RGBLEDs()
+        if self.__alarm_activated:
+            self.__alarm_timer.deinit()
+            self.__alarm_activated = False
+            self.turn_off_all_rgbleds()
+            self.silence_buzzer()
+            self.__change_on_off = True
 
-    def initialize_Buzzer(self) -> None:
+    def initialize_buzzer(self) -> None:
         """
         Initialize the buzzer.
         """
-        self.__pwm = PWM(Pin(self.__pwmPin))
-        self.__pwmFreq = 1000
+        self.__pwm = PWM(Pin(self.__pwm_pin))
+        self.__pwm_freq = 1000
         self.__duty_u16 = 0
-        self.__buzzer_alarm_activated = False
-        self.__changeOn_Off_buzzer = False
 
-    def setFreq_Buzzer(self, freq: int) -> None:
+    def set_freq_buzzer(self, freq: int) -> None:
         """
         Set the frequency of the buzzer.
 
@@ -167,9 +179,9 @@ class Actuators:
         if freq < 50 or freq > 20000:
             print("It is not possible to set the frequency to " + str(freq) + "Hz")
         else:
-            self.__pwmFreq = freq
+            self.__pwm_freq = freq
 
-    def setVolume_Buzzer(self, volume: int) -> None:
+    def set_volume_buzzer(self, volume: int) -> None:
         """
         Set the volume of the buzzer.
 
@@ -181,54 +193,27 @@ class Actuators:
         else:
             self.__duty_u16 = volume
 
-    def sound_Buzzer(self) -> None:
+    def sound_buzzer(self) -> None:
         """
         Turn on the buzzer with the set frequency and volume.
         """
-        self.__pwm.freq(self.__pwmFreq)
+        self.__pwm.freq(self.__pwm_freq)
         self.__pwm.duty_u16(self.__duty_u16)
 
-    def silence_Buzzer(self) -> None:
+    def silence_buzzer(self) -> None:
         """
         Turn off the buzzer.
         """
         self.__pwm.duty_u16(0)
 
-    def _tune_Buzzer(self, t) -> None:
-        """
-        Internal method for toggling the buzzer on/off based on the alarm state.
-        """
-        if self.__changeOn_Off_buzzer:
-            self.sound_Buzzer()
-        else:
-            self.silence_Buzzer()
-        self.__changeOn_Off_buzzer = not self.__changeOn_Off_buzzer
-
-    def activate_Buzzer_alarm(self) -> None:
-        """
-        Activate the buzzer alarm.
-        """
-        if not self.__buzzer_alarm_activated:
-            self.__buzzer_timer = Timer(period=500, mode=Timer.PERIODIC, callback=self._tune_Buzzer)
-            self.__buzzer_alarm_activated = True
-
-    def deactivate_Buzzer_alarm(self) -> None:
-        """
-        Deactivate the buzzer alarm.
-        """
-        if self.__buzzer_alarm_activated:
-            self.__buzzer_timer.deinit()
-            self.__buzzer_alarm_activated = False
-            self.silence_Buzzer()
-
     def deinit(self) -> None:
         """
         Deinitialize the Actuators object.
         """
-        self.silence_Buzzer()
-        self.turnOff_all_RGBLEDs()
-        self.__rgbled_timer.deinit()
-        self.__buzzer_timer.deinit()
+        self.silence_buzzer()
+        self.turn_off_all_rgbleds()
+        if self.__alarm_timer is not None:
+            self.__alarm_timer.deinit()
         self.__pwm.deinit()
         self.__pixelp.deinit()
         

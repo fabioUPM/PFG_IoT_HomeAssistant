@@ -62,7 +62,7 @@ bool FlameDetector::isFlameDetected() {
     if (flameDetected && !flameEnded) {
         flameDetected = false;
         detachInterrupt(digitalPinToInterrupt(pin));
-        delay(10);
+        delay(100);
         attachInterrupt(digitalPinToInterrupt(pin), onFall, FALLING);
         return true;
     }
@@ -77,7 +77,7 @@ bool FlameDetector::isFlameEnded() {
     if (flameEnded && !flameDetected) {
         flameEnded = false;
         detachInterrupt(digitalPinToInterrupt(pin));
-        delay(10);
+        delay(100);
         attachInterrupt(digitalPinToInterrupt(pin), onRise, RISING);
         return true;
     }
